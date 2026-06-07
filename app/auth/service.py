@@ -101,3 +101,17 @@ def refrescar_tokens(refresh_token:str, db:Session)->dict:
         "access_token": new_access_token,
         "refresh_token": new_refresh_token
     }
+
+def logout_service(user_id:int, refresh_token:str, db:Session):
+
+    token_fin = db.query(RefreshToken).filter(RefreshToken.user_id==user_id, RefreshToken.revoked==False).all()
+
+    for t in token_fin:
+        if bcrypt.checkpw(refresh_token.encode('utf-8'),t.token.encode("utf-8")):
+            t.revoked=True
+            db.commit()
+
+
+    raise HTTPException(status_code=401, detail="Falta de credenciales")
+
+
